@@ -116,12 +116,28 @@ public class Main {
             mainMenuInput:
             while (true) {
                 printBreaker();
-                System.out.println("Cent Main Menu\n[1] Send\n[2] Receive\n[3] Mine\n[~] Exit");
+                System.out.println("Cent Main Menu\n[1] Send\n[2] Account\n[3] Mine\n[~] Exit");
                 String mainMenuInput = in.readLine();
                 if (mainMenuInput.equals("1")) {
-
+                    System.out.print("Recipient ID: ");
+                    String ID = in.readLine();
+                    System.out.print("Amount to send: ");
+                    String amount = in.readLine();
+                    System.out.println("Transferring...");
+                    String res = query("10|" + un + "|" + pw + "|" + amount + "|" + ID);
+                    if (res.equals("0")) {
+                        System.out.println("Successfully transferred " + amount + " to " + ID + ".");
+                    } else {
+                        System.out.println("Something went wrong.");
+                    }
+                    System.out.println("[ENTER] Continue");
+                    in.readLine();
                 } else if (mainMenuInput.equals("2")) {
-
+                    String ID = query("9|" + un);
+                    String balance = query("8|" + un);
+                    printBreaker();
+                    System.out.println("Account ID: " + ID + "\nBalance: " + balance + "\n[ENTER] Back");
+                    in.readLine();
                 } else if (mainMenuInput.equals("3")) {
                     printBreaker();
                     System.out.println("Beginning mining.\n[~] Stop");
@@ -140,7 +156,7 @@ public class Main {
                             System.out.println(ID + ": " + start);
                             Random random = new Random();
                             while (true) {
-                                int key = random.nextInt(1000);
+                                int key = random.nextInt(10000);
                                 int target = 0;
                                 try {
                                     target = start / key;
@@ -149,7 +165,7 @@ public class Main {
                                 String check = query("6|" + ID + "|" + target + "|" + un);
                                 String[] checkArgs = check.split("\\|");
                                 if (checkArgs[1].equals("0")) {
-                                    System.out.println("    -> " + target + "\n    + " + checkArgs[2] + "\n    = " + query("8|" + un));
+                                    System.out.println("    > " + target + "\n    + " + checkArgs[2] + "\n    = " + query("8|" + un));
                                     break;
                                 }
                             }

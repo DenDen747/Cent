@@ -15,18 +15,18 @@ public class Request {
         this.target = target;
         this.key = key;
         this.start = start;
-        begin = System.currentTimeMillis();
+        begin = System.nanoTime();
     }
 
     public long end() {
-        end = System.currentTimeMillis();
+        end = System.nanoTime();
         return end - begin;
     }
 
     public static Request generate(int ID) {
         Random random = new Random();
-        int target = random.nextInt(10000);
-        int key = random.nextInt(1000);
+        int target = random.nextInt(100000);
+        int key = random.nextInt(10000);
         int start = target * key;
         return new Request(ID, target, key, start);
     }

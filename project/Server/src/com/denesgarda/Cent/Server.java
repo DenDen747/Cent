@@ -115,8 +115,12 @@ public class Server {
                                                     }
                                                     if (found) {
                                                         if (target == request.target) {
-                                                            long millis = request.end();
-                                                            double profit = (double) millis / 10000;
+                                                            long nanos = request.end();
+                                                            double v = (double) nanos / 75000;
+                                                            if (v == 0) {
+                                                                v = 1;
+                                                            }
+                                                            double profit = 0.075 / v;
                                                             addBalance(args[3], profit);
                                                             send(socket, "7|0|" + profit);
                                                             Main.requests.remove(request);
@@ -129,6 +133,20 @@ public class Server {
                                                 } else if (args[0].equals("8")) {
                                                     String username = args[1];
                                                     send(socket, String.valueOf(getBalance(username)));
+                                                } else if (args[0].equals("9")) {
+                                                    String username = args[1];
+                                                    send(socket, String.valueOf(getID(username)));
+                                                } else if (args[0].equals("10")) {
+                                                    try {
+                                                        String username = args[1];
+                                                        String password = args[2];
+                                                        double amount = Double.parseDouble(args[3]);
+                                                        int ID = Integer.parseInt(args[4]);
+                                                        int status = transfer(username, password, amount, ID);
+                                                        send(socket, String.valueOf(status));
+                                                    } catch (Exception e) {
+                                                        send(socket, "-1");
+                                                    }
                                                 }
                                             }
                                         }
@@ -211,5 +229,66 @@ public class Server {
             }
         }
         return 0;
+    }
+
+    public static double removeBalance(String username, double amount) throws IOException {
+        File accounts = new File("data" + File.separator + "accounts");
+        for (File account : accounts.listFiles()) {
+            Properties parsed = new Properties();
+            parsed.load(new FileReader(account));
+            if (parsed.get("username").equals(username)) {
+                double balance = Double.parseDouble((String) parsed.get("balance"));
+                balance -= amount;
+                parsed.put("balance", String.valueOf(balance));
+                parsed.store(new FileWriter("data" + File.separator + "accounts" + File.separator + account.getName()), null);
+            }
+        }
+        return 0;
+    }
+
+    public static String getUsername(int ID) throws IOException {
+        File accounts = new File("data" + File.separator + "accounts");
+        for (File account : accounts.listFiles()) {
+            Properties parsed = new Properties();
+            parsed.load(new FileReader(account));
+            if (account.getName().equals(ID + ".properties")) {
+                return (String) parsed.get("username");
+            }
+        }
+        return null;
+    }
+
+    public static int getID(String username) throws IOException {
+        File accounts = new File("data" + File.separator + "accounts");
+        for (File account : accounts.listFiles()) {
+            Properties parsed = new Properties();
+            parsed.load(new FileReader(account));
+            if (parsed.get("username").equals(username)) {
+                return Integer.parseInt(account.getName().split("\\.")[0]);
+            }
+        }
+        return -1;
+    }
+
+    public static int transfer(String username, String password, double amount, int ID) throws IOException {
+        try {
+            Boolean access = Util.validate(username, password);
+            if (access) {
+                if (getBalance(username) - amount < 0) {
+                    return -1;
+                }
+                removeBalance(username, amount);
+                String un = getUsername(ID);
+                if (un == null) {
+                    return -1;
+                }
+                addBalance(un, amount);
+                return 0;
+            } else {
+                return -1;
+            }
+        } catch (Exception e) {
+            return -1;
+        }
     }
 }
