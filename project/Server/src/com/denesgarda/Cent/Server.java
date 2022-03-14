@@ -50,7 +50,6 @@ public class Server {
                                                         send(socket, "-1");
                                                     }
                                                 } else if (args[0].equals("2")) {
-                                                    System.out.println(line);
                                                     File accounts = new File("data" + File.separator + "accounts");
                                                     boolean exists = false;
                                                     for (File account : accounts.listFiles()) {
